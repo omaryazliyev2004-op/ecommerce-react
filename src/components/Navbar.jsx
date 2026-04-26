@@ -8,7 +8,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="pb-[100px]">
+    <div className="pb-[50px]">
       <nav className="flex items-center justify-between md:justify-center gap-[40px] px-6 md:px-12 py-5 bg-[#f5f5f7]/90 backdrop-blur-md fixed top-0 left-0 right-0 w-full z-50">
 
         {/* Logo */}
