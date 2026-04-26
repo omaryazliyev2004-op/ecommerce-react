@@ -8,7 +8,7 @@ export default function Cart() {
       <h1 className="text-2xl font-bold mb-6">Cart</h1>
 
       {cart.length === 0 ? (
-        <p>Cart bo‘sh 😢</p>
+        <p>Cart bo‘sh !!</p>
       ) : (
         cart.map(item => (
           <div
