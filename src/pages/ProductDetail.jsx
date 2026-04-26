@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { products } from "../data/products";
+import { products } from "../Data/products";
 import { useCartStore } from "../store/cartStore";
 
 export default function ProductDetail() {
