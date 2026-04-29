@@ -5,42 +5,46 @@ export default function ProductCard({ product }) {
   const addToCart = useCartStore((state) => state.addToCart);
 
   return (
-    <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-
-      {/* Image */}
-      <Link to={`/product/${product.id}`}>
-        <div className="bg-gray-50 flex items-center justify-center h-56 p-6">
+    <article className="group overflow-hidden rounded-[28px] border border-gray-200/70 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_24px_80px_rgba(15,23,42,0.13)]">
+      <Link to={`/product/${product.id}`} className="block">
+        <div className="relative flex aspect-[1.08] items-center justify-center overflow-hidden bg-gradient-to-br from-[#f7f8fb] to-[#eef1f6] p-7">
+          <span className="absolute left-4 top-4 rounded-full bg-white/82 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500 shadow-sm backdrop-blur">
+            {product.category}
+          </span>
           <img
             src={product.image}
             alt={product.title}
-            className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-500"
+            className="h-full w-full object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.18)] transition duration-500 group-hover:scale-110"
           />
         </div>
 
-        {/* Info */}
-        <div className="p-4">
-          <span className="text-xs text-blue-500 font-semibold uppercase tracking-widest">
-            {product.category}
-          </span>
-          <h2 className="font-semibold text-gray-900 mt-1 text-[15px] line-clamp-2 group-hover:text-blue-600 transition">
+        <div className="p-5">
+          <h2 className="min-h-12 text-base font-black leading-6 text-gray-950 transition group-hover:text-blue-600">
             {product.title}
           </h2>
-          <p className="text-gray-800 font-bold mt-1 text-lg">
-            ${product.price}
+          <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-gray-500">
+            {product.description}
           </p>
+          <div className="mt-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-400">Price</p>
+              <p className="mt-1 text-2xl font-black text-gray-950">${product.price}</p>
+            </div>
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600">
+              In stock
+            </span>
+          </div>
         </div>
       </Link>
 
-      {/* Button */}
-      <div className="px-4 pb-4">
+      <div className="px-5 pb-5">
         <button
           onClick={() => addToCart(product)}
-          className="w-full bg-black text-white py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 active:scale-95 transition-all duration-200"
+          className="min-h-11 w-full rounded-full bg-gray-950 px-5 text-sm font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-blue-600 active:scale-[0.98]"
         >
           Add to Cart
         </button>
       </div>
-
-    </div>
+    </article>
   );
 }

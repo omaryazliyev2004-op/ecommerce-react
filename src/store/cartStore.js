@@ -43,7 +43,7 @@ export const useCartStore = create(
       clearCart: () => set({ cart: [] })
     }),
     {
-      name: "cart-storage", // localStorage key
+      name: "cart-storage", 
     }
   )
 );

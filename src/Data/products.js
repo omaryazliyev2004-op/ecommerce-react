@@ -1,5 +1,4 @@
 export const products = [
-  // ========== iPHONE ==========
   {
     id: 1,
     title: "iPhone 15 Pro",
@@ -57,7 +56,6 @@ export const products = [
     description: "A15 Bionic, Touch ID, arzon narx"
   },
 
-  // ========== MAC ==========
   {
     id: 8,
     title: "MacBook Air M2",
