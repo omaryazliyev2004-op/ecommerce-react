@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useToastStore } from "./toastStore";
 
 export const useCartStore = create(
   persist(
@@ -22,6 +23,7 @@ export const useCartStore = create(
             cart: [...get().cart, { ...product, qty: 1 }]
           });
         }
+        useToastStore.getState().addToast(`${product.title} added to cart`);
       },
       decreaseQty: (id) => {
         const updated = get().cart
@@ -38,6 +40,7 @@ export const useCartStore = create(
         set({
           cart: get().cart.filter(item => item.id !== id)
         });
+        useToastStore.getState().addToast("Item removed from cart", "error");
       },
 
       clearCart: () => set({ cart: [] })

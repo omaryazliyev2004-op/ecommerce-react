@@ -8,14 +8,6 @@ export const products = [
     description: "A17 Pro chip, titanium dizayn, 48MP kamera"
   },
   {
-    id: 2,
-    title: "iPhone 15 Pro Max",
-    price: 1199,
-    image: "/images/iphone15max.png",
-    category: "iphone",
-    description: "6.7 dyuym, 5x optik zoom, USB-C"
-  },
-  {
     id: 3,
     title: "iPhone 15",
     price: 799,
@@ -121,7 +113,6 @@ export const products = [
     description: "M2 Ultra, 192GB RAM, professional studio"
   },
 
-  // ========== WATCH ==========
   {
     id: 16,
     title: "Apple Watch Series 9",
