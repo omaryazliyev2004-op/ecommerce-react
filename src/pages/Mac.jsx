@@ -1,7 +1,8 @@
-import { products } from "../Data/products";
+import { useProductStore } from "../store/productStore";
 import ProductCard from "../components/ProductCard";
 
 export default function Mac() {
+  const products = useProductStore((state) => state.products);
   const macProducts = products.filter((p) => p.category === "mac");
 
   return (

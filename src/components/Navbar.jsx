@@ -7,6 +7,7 @@ const navLinks = [
   { to: "/mac", label: "Mac" },
   { to: "/iphone", label: "iPhone" },
   { to: "/watch", label: "Watch" },
+  { to: "/admin", label: "Admin" },
 ];
 
 export default function Navbar() {

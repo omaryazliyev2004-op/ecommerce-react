@@ -7,6 +7,7 @@ import Mac from "./pages/Mac";
 import Iphone from "./pages/Iphone";
 import Watch from "./pages/Watch";
 import ProductDetail from "./pages/ProductDetail";
+import Admin from "./pages/Admin";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/watch" element={<Watch />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Footer />
       </div>

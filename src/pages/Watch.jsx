@@ -1,7 +1,8 @@
-import { products } from "../Data/products";
+import { useProductStore } from "../store/productStore";
 import ProductCard from "../components/ProductCard";
 
 export default function Watch() {
+  const products = useProductStore((state) => state.products);
   const watchProducts = products.filter((p) => p.category === "watch");
 
   return (

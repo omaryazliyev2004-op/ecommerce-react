@@ -7,14 +7,14 @@ export default function ProductCard({ product }) {
   return (
     <article className="group overflow-hidden rounded-[28px] border border-gray-200/70 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)] transition duration-300 hover:-translate-y-1 hover:border-gray-300 hover:shadow-[0_24px_80px_rgba(15,23,42,0.13)]">
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative flex aspect-[1.08] items-center justify-center overflow-hidden bg-gradient-to-br from-[#f7f8fb] to-[#eef1f6] p-7">
-          <span className="absolute left-4 top-4 rounded-full bg-white/82 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500 shadow-sm backdrop-blur">
+        <div className="relative flex aspect-[1.08] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#f7f8fb] to-[#eef1f6] p-8">
+          <span className="absolute left-4 top-4 z-10 rounded-full bg-white/82 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500 shadow-sm backdrop-blur">
             {product.category}
           </span>
           <img
             src={product.image}
             alt={product.title}
-            className="h-full w-full object-contain drop-shadow-[0_18px_28px_rgba(15,23,42,0.18)] transition duration-500 group-hover:scale-110"
+            className="h-full w-full object-contain mix-blend-multiply transition duration-500 group-hover:scale-110"
           />
         </div>
 

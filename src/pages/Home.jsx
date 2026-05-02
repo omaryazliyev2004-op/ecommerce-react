@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { products } from "../Data/products";
+import { useProductStore } from "../store/productStore";
 import Hero from "../components/Hero";
 import ProductCard from "../components/ProductCard";
 
@@ -24,9 +24,12 @@ const categories = [
   },
 ];
 
-const featuredProducts = products.slice(0, 8);
+
 
 export default function Home() {
+  const products = useProductStore((state) => state.products);
+  const featuredProducts = products.slice(0, 8);
+
   return (
     <main className="bg-white">
       <Hero />
