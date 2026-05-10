@@ -9,7 +9,7 @@ export default function Admin() {
   const [form, setForm] = useState({
     title: "",
     price: "",
-    image: "",
+    images: [""],
     category: "iphone",
     description: "",
   });
@@ -18,19 +18,38 @@ export default function Admin() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (idx, value) => {
+    const newImages = [...form.images];
+    newImages[idx] = value;
+    setForm({ ...form, images: newImages });
+  };
+
+  const addImageField = () => {
+    if (form.images.length < 3) {
+      setForm({ ...form, images: [...form.images, ""] });
+    }
+  };
+
+  const removeImageField = (idx) => {
+    setForm({ ...form, images: form.images.filter((_, i) => i !== idx) });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.title || !form.price || !form.image) return;
+    const filteredImages = form.images.filter(Boolean);
+    if (!form.title || !form.price || filteredImages.length === 0) return;
 
     addProduct({
       ...form,
       price: Number(form.price),
+      images: filteredImages,
+      image: filteredImages[0],
     });
 
     setForm({
       title: "",
       price: "",
-      image: "",
+      images: [""],
       category: "iphone",
       description: "",
     });
@@ -46,11 +65,13 @@ export default function Admin() {
         </div>
 
         <div className="grid gap-10 lg:grid-cols-[1fr_2fr]">
+
           {/* Form */}
           <div className="h-fit rounded-[32px] bg-white/60 p-8 shadow-[0_20px_70px_rgba(15,23,42,0.06)] backdrop-blur-xl border border-white/50 dark:border-gray-800 dark:bg-gray-900/60">
             <h2 className="mb-6 text-2xl font-bold text-gray-950 dark:text-white">Add New Product</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
+              {/* Title */}
               <div>
                 <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">Product Title</label>
                 <input
@@ -64,6 +85,7 @@ export default function Admin() {
                 />
               </div>
 
+              {/* Price */}
               <div>
                 <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">Price ($)</label>
                 <input
@@ -77,28 +99,61 @@ export default function Admin() {
                 />
               </div>
 
+              {/* Images */}
               <div>
-                <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">Image URL</label>
-                <input
-                  type="url"
-                  name="image"
-                  value={form.image}
-                  onChange={handleChange}
-                  placeholder="https://example.com/image.png"
-                  className="w-full rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white"
-                  required
-                />
-                {/* Rasm preview */}
-                {form.image && (
-                  <img
-                    src={form.image}
-                    alt="Preview"
-                    className="mt-3 h-24 w-24 rounded-2xl object-contain border border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800"
-                    onError={(e) => e.target.style.display = "none"}
-                  />
+                <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">
+                  Product Images (Max 3)
+                </label>
+
+                {form.images.map((img, idx) => (
+                  <div key={idx} className="mb-3 flex gap-2">
+                    <input
+                      type="url"
+                      value={img}
+                      onChange={(e) => handleImageChange(idx, e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white"
+                    />
+                    {form.images.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeImageField(idx)}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition dark:bg-red-500/10"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {/* Preview */}
+                {form.images.filter(Boolean).length > 0 && (
+                  <div className="flex gap-2 mt-2">
+                    {form.images.filter(Boolean).map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt="Preview"
+                        className="h-16 w-16 rounded-xl object-contain border border-gray-200 bg-gray-50 p-1 dark:border-gray-700 dark:bg-gray-800"
+                        onError={(e) => (e.target.style.display = "none")}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Add image button */}
+                {form.images.length < 3 && (
+                  <button
+                    type="button"
+                    onClick={addImageField}
+                    className="mt-3 flex items-center gap-2 rounded-full border border-dashed border-gray-300 px-4 py-2 text-sm font-bold text-gray-500 hover:border-blue-500 hover:text-blue-500 transition dark:border-gray-600 dark:text-gray-400 dark:hover:border-blue-400 dark:hover:text-blue-400"
+                  >
+                    + Add Image
+                  </button>
                 )}
               </div>
 
+              {/* Category */}
               <div>
                 <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">Category</label>
                 <select
@@ -113,6 +168,7 @@ export default function Admin() {
                 </select>
               </div>
 
+              {/* Description */}
               <div>
                 <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">Description</label>
                 <textarea
@@ -136,11 +192,20 @@ export default function Admin() {
 
           {/* Product List */}
           <div className="rounded-[32px] bg-white p-8 shadow-[0_20px_70px_rgba(15,23,42,0.04)] dark:bg-gray-900">
-            <h2 className="mb-6 text-2xl font-bold text-gray-950 dark:text-white">Current Products ({products.length})</h2>
+            <h2 className="mb-6 text-2xl font-bold text-gray-950 dark:text-white">
+              Current Products ({products.length})
+            </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {products.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 rounded-2xl border border-gray-100 p-4 transition hover:bg-[#f5f5f7] dark:border-gray-800 dark:hover:bg-gray-800">
-                  <img src={item.image} alt={item.title} className="h-16 w-16 rounded-xl object-contain bg-gray-50 p-2 dark:bg-gray-800" />
+                <div
+                  key={item.id}
+                  className="flex items-center gap-4 rounded-2xl border border-gray-100 p-4 transition hover:bg-[#f5f5f7] dark:border-gray-800 dark:hover:bg-gray-800"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-16 w-16 rounded-xl object-contain bg-gray-50 p-2 dark:bg-gray-800"
+                  />
                   <div className="flex-1">
                     <h3 className="text-sm font-bold text-gray-950 line-clamp-1 dark:text-white">{item.title}</h3>
                     <p className="text-xs text-gray-500 uppercase dark:text-gray-400">{item.category}</p>
@@ -148,7 +213,7 @@ export default function Admin() {
                   </div>
                   <button
                     onClick={() => deleteProduct(item.id)}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-500 hover:text-white dark:bg-red-500/10 dark:hover:bg-red-500"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-500 transition hover:bg-red-500 hover:text-white dark:bg-red-500/10 dark:hover:bg-red-500 dark:hover:text-white"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 6h18"></path>
@@ -160,6 +225,7 @@ export default function Admin() {
               ))}
             </div>
           </div>
+
         </div>
       </section>
     </main>

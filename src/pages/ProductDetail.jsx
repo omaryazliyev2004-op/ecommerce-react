@@ -8,7 +8,7 @@ export default function ProductDetail() {
   const { id } = useParams();
   const addToCart = useCartStore((state) => state.addToCart);
   const products = useProductStore((state) => state.products);
-  const product = products.find((item) => item.id === Number(id));
+  const product = products.find((item) => String(item.id) === String(id));
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const isFavorite = product ? isInWishlist(product.id) : false;
 
@@ -46,7 +46,7 @@ export default function ProductDetail() {
               className="max-h-[400px] w-full object-contain drop-shadow-[0_34px_55px_rgba(15,23,42,0.20)] animate-fade-in"
             />
           </div>
-          
+
           {/* Thumbnails */}
           {images.length > 1 && (
             <div className="flex gap-3 overflow-x-auto pb-2">
