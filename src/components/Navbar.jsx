@@ -4,6 +4,10 @@ import SearchModal from "./SearchModal";
 import { useCartStore } from "../store/cartStore";
 import { useWishlistStore } from "../store/wishlistStore";
 import { useThemeStore } from "../store/themeStore";
+import { auth } from "../Data/firebase";
+import { signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -21,6 +25,20 @@ export default function Navbar() {
   const wishlistQty = wishlist.length;
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
 
   return (
     <>
@@ -102,6 +120,16 @@ export default function Navbar() {
               )}
             </Link>
 
+            {/* Logout tugmasi - faqat login qilgan bo'lsa ko'rinadi */}
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="hidden md:inline-flex h-11 items-center justify-center rounded-full bg-red-500 px-4 text-sm font-bold text-white transition hover:bg-red-600"
+              >
+                Logout
+              </button>
+            )}
+
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-950 md:hidden"
@@ -121,6 +149,7 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Mobil menyu */}
       {menuOpen && (
         <div className="fixed inset-x-0 top-[72px] z-40 border-b border-black/5 bg-white/96 px-5 py-5 shadow-2xl backdrop-blur-2xl md:hidden">
           <div className="mx-auto grid max-w-7xl gap-2">
@@ -134,6 +163,15 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {/* Mobil logout */}
+            {user && (
+              <button
+                onClick={() => { handleLogout(); setMenuOpen(false); }}
+                className="rounded-2xl px-4 py-4 text-lg font-black text-red-500 transition hover:bg-red-50 text-left"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
       )}

@@ -1,65 +1,71 @@
 import { create } from "zustand";
 import { products as initialProducts } from "../Data/products";
-
-const API_URL = "http://localhost:5000/api/products";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../Data/firebase";
 
 export const useProductStore = create((set, get) => ({
-  products: initialProducts,
+  products: [],
   isLoading: false,
   error: null,
 
   fetchProducts: async () => {
     set({ isLoading: true });
     try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Mahsulotlarni yuklashda xatolik");
-      const data = await response.json();
-      // Baza ObjectId (_id) ishlatgani uchun ularni ismiga moslashtiramiz (aslida backendda id berdik)
-      const mappedData = data.map(item => ({
-        ...item,
-        id: item.id || item._id
+      const snapshot = await getDocs(collection(db, "products"));
+      const data = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
       }));
-      set({ products: mappedData, isLoading: false });
+
+      if (data.length === 0) {
+        await get().seedProducts();
+      } else {
+        set({ products: data, isLoading: false });
+      }
     } catch (error) {
-      console.warn("Backend ishlamayotgan bo'lishi mumkin. Mahalliy ma'lumotlar ishlatilmoqda.");
+      console.error(error);
       set({ error: error.message, isLoading: false, products: initialProducts });
+    }
+  },
+
+  seedProducts: async () => {
+    try {
+      const promises = initialProducts.map((product) =>
+        addDoc(collection(db, "products"), product)
+      );
+      await Promise.all(promises);
+      await get().fetchProducts();
+    } catch (error) {
+      console.error("Seed xatosi:", error);
+      set({ products: initialProducts, isLoading: false });
     }
   },
 
   addProduct: async (product) => {
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(product),
-      });
-      
-      if (!response.ok) throw new Error("Qo'shishda xatolik");
-      const newProduct = await response.json();
-      
+      const docRef = await addDoc(collection(db, "products"), product);
       set({
-        products: [{ ...newProduct, id: newProduct.id || newProduct._id }, ...get().products],
+        products: [{ id: docRef.id, ...product }, ...get().products],
       });
     } catch (error) {
-      console.error(error);
+      console.error("Qo'shishda xatolik:", error);
     }
   },
 
   deleteProduct: async (id) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) throw new Error("O'chirishda xatolik");
-      
+      await deleteDoc(doc(db, "products", id));
       set({
-        products: get().products.filter((p) => p.id !== id && p._id !== id),
+        products: get().products.filter((p) => p.id !== id),
       });
     } catch (error) {
-      console.error(error);
+      console.error("O'chirishda xatolik:", error);
     }
   },
 }));

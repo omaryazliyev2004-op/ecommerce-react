@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";          // ← qo'shildi
 import { useProductStore } from "../store/productStore";
 import Hero from "../components/Hero";
 import ProductCard from "../components/ProductCard";
@@ -24,11 +25,15 @@ const categories = [
   },
 ];
 
-
-
 export default function Home() {
   const products = useProductStore((state) => state.products);
+  const fetchProducts = useProductStore((state) => state.fetchProducts);  
+  const isLoading = useProductStore((state) => state.isLoading);          
   const featuredProducts = products.slice(0, 8);
+
+  useEffect(() => {
+    fetchProducts();   
+  }, []);
 
   return (
     <main className="bg-white dark:bg-[#030712]">
@@ -77,11 +82,17 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {featuredProducts.map((item) => (
-            <ProductCard key={item.id} product={item} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredProducts.map((item) => (
+              <ProductCard key={item.id} product={item} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="mx-auto max-w-7xl px-5 pb-16 sm:px-8 lg:px-10">
