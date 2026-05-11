@@ -1,0 +1,88 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../Data/firebase";
+
+export default function AdminLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    if (email !== "omaryazliyev2004@gmail.com") {
+      setErrorMsg("Siz admin emassiz!");
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/admin");
+    } catch (error) {
+      setErrorMsg("Email yoki parol noto'g'ri!");
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-[#f5f5f7] dark:bg-[#030712] flex items-center justify-center px-5">
+      <div className="w-full max-w-md rounded-[32px] border border-white/50 bg-white/70 p-8 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-gray-800 dark:bg-gray-900/70">
+
+        <div className="text-center">
+          <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-600 dark:text-blue-400">
+            Admin Panel
+          </p>
+          <h1 className="mt-4 text-4xl font-black text-gray-950 dark:text-white">
+            Admin Login
+          </h1>
+          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            Faqat adminlar kira oladi.
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="mt-10 flex flex-col gap-5">
+          <div>
+            <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="Admin email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-gray-700 dark:text-gray-300">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="Admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-sm text-gray-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white"
+              required
+            />
+          </div>
+
+          {errorMsg && (
+            <p className="text-red-500 text-sm text-center">{errorMsg}</p>
+          )}
+
+          <button
+            type="submit"
+            className="mt-2 w-full rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 py-4 text-sm font-bold text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-1 hover:shadow-blue-500/40"
+          >
+            Enter Admin Panel
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}

@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { db } from "../Data/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useCartStore } from "../store/cartStore";
 
-export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems, onSuccess }) {
-  const [step, setStep] = useState(1); // 1: Delivery, 2: Payment, 3: Success
+export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems, onSuccess, user }) {
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -25,19 +28,42 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
     setStep(2);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const cart = useCartStore.getState().cart;
+
+      await addDoc(collection(db, "orders"), {
+        userId: user?.uid || "guest",
+        userEmail: user?.email || "guest",
+        name: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        paymentMethod: formData.paymentMethod,
+        items: cart.map((item) => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+          qty: item.qty,
+          image: item.image,
+        })),
+        totalAmount,
+        totalItems,
+        status: "pending",
+        createdAt: serverTimestamp(),
+      });
+
       setIsProcessing(false);
       setStep(3);
       onSuccess();
-    }, 1500);
+    } catch (error) {
+      console.error("Buyurtma saqlashda xatolik:", error);
+      setIsProcessing(false);
+    }
   };
 
-  // Format card number as XXXX XXXX XXXX XXXX
   const handleCardNumberChange = (e) => {
     let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
     let formatted = '';
@@ -50,23 +76,20 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-gray-950/40 backdrop-blur-md transition-opacity" 
+      <div
+        className="absolute inset-0 bg-gray-950/40 backdrop-blur-md transition-opacity"
         onClick={step === 3 ? undefined : onClose}
       ></div>
 
-      {/* Modal Content */}
       <div className="relative w-full max-w-lg overflow-hidden rounded-[32px] bg-white shadow-2xl transition-all">
-        
-        {/* Header */}
+
         {step !== 3 && (
           <div className="flex items-center justify-between border-b border-gray-100 px-8 py-5">
             <div>
               <h2 className="text-xl font-black text-gray-950">Checkout</h2>
               <p className="text-sm font-semibold text-gray-500">{totalItems} items • ${totalAmount}</p>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-gray-200"
             >
@@ -78,7 +101,6 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
         )}
 
         <div className="p-8">
-          {/* STEP 1: Delivery Details */}
           {step === 1 && (
             <form onSubmit={handleNext} className="animate-fade-in">
               <h3 className="mb-5 text-lg font-bold text-gray-900">Delivery Information</h3>
@@ -120,8 +142,8 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                   ></textarea>
                 </div>
               </div>
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="mt-8 w-full rounded-full bg-gray-950 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600 active:scale-[0.98]"
               >
                 Continue to Payment
@@ -129,21 +151,13 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
             </form>
           )}
 
-          {/* STEP 2: Payment Method */}
           {step === 2 && (
             <form onSubmit={handleSubmit} className="animate-fade-in">
               <h3 className="mb-5 text-lg font-bold text-gray-900">Payment Method</h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <label className={`cursor-pointer rounded-2xl border-2 p-4 transition ${formData.paymentMethod === 'cash' ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-[#f5f5f7] hover:border-gray-200'}`}>
-                  <input 
-                    type="radio" 
-                    name="paymentMethod" 
-                    value="cash" 
-                    checked={formData.paymentMethod === 'cash'} 
-                    onChange={handleChange} 
-                    className="hidden"
-                  />
+                  <input type="radio" name="paymentMethod" value="cash" checked={formData.paymentMethod === 'cash'} onChange={handleChange} className="hidden" />
                   <div className="flex flex-col items-center gap-2 text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 ${formData.paymentMethod === 'cash' ? 'text-blue-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -153,14 +167,7 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                 </label>
 
                 <label className={`cursor-pointer rounded-2xl border-2 p-4 transition ${formData.paymentMethod === 'card' ? 'border-blue-500 bg-blue-50' : 'border-gray-100 bg-[#f5f5f7] hover:border-gray-200'}`}>
-                  <input 
-                    type="radio" 
-                    name="paymentMethod" 
-                    value="card" 
-                    checked={formData.paymentMethod === 'card'} 
-                    onChange={handleChange} 
-                    className="hidden"
-                  />
+                  <input type="radio" name="paymentMethod" value="card" checked={formData.paymentMethod === 'card'} onChange={handleChange} className="hidden" />
                   <div className="flex flex-col items-center gap-2 text-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-8 w-8 ${formData.paymentMethod === 'card' ? 'text-blue-500' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -170,7 +177,6 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                 </label>
               </div>
 
-              {/* Card Details (Only if Card is selected) */}
               <div className={`mt-6 space-y-4 overflow-hidden transition-all duration-300 ${formData.paymentMethod === 'card' ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div>
                   <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">Card Number</label>
@@ -188,7 +194,6 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                     </svg>
                   </div>
                 </div>
-                
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">Expiry Date</label>
@@ -199,8 +204,8 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                       value={formData.expiry}
                       onChange={(e) => {
                         let val = e.target.value.replace(/[^0-9]/g, '');
-                        if (val.length > 2) val = val.substring(0,2) + '/' + val.substring(2,4);
-                        setFormData({...formData, expiry: val.substring(0,5)});
+                        if (val.length > 2) val = val.substring(0, 2) + '/' + val.substring(2, 4);
+                        setFormData({ ...formData, expiry: val.substring(0, 5) });
                       }}
                       placeholder="MM/YY"
                       className="w-full rounded-2xl border border-gray-200 bg-[#f5f5f7] px-4 py-3.5 text-sm font-bold text-gray-950 outline-none transition focus:border-blue-500 focus:bg-white"
@@ -213,7 +218,7 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                       name="cvv"
                       required={formData.paymentMethod === 'card'}
                       value={formData.cvv}
-                      onChange={(e) => setFormData({...formData, cvv: e.target.value.replace(/[^0-9]/g, '').substring(0,3)})}
+                      onChange={(e) => setFormData({ ...formData, cvv: e.target.value.replace(/[^0-9]/g, '').substring(0, 3) })}
                       placeholder="•••"
                       className="w-full rounded-2xl border border-gray-200 bg-[#f5f5f7] px-4 py-3.5 text-sm font-bold text-gray-950 outline-none transition focus:border-blue-500 focus:bg-white"
                     />
@@ -222,15 +227,15 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
               </div>
 
               <div className="mt-8 flex gap-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setStep(1)}
                   className="flex w-1/3 items-center justify-center rounded-full bg-gray-100 py-4 text-sm font-bold text-gray-700 transition hover:bg-gray-200"
                 >
                   Back
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isProcessing}
                   className="relative flex w-2/3 items-center justify-center overflow-hidden rounded-full bg-gray-950 py-4 text-sm font-bold text-white transition hover:bg-blue-600 disabled:bg-gray-400"
                 >
@@ -244,7 +249,6 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
             </form>
           )}
 
-          {/* STEP 3: Success State */}
           {step === 3 && (
             <div className="flex flex-col items-center py-6 text-center animate-fade-in">
               <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-100 text-green-500">
@@ -257,7 +261,7 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                 Your order has been placed successfully.<br />
                 We will contact you shortly at <span className="font-bold text-gray-900">{formData.phone}</span>.
               </p>
-              
+
               <div className="mt-8 w-full rounded-2xl bg-[#f5f5f7] p-5 text-left text-sm font-semibold text-gray-600">
                 <div className="flex justify-between border-b border-gray-200 pb-3">
                   <span>Order Number</span>
@@ -269,10 +273,18 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
                 </div>
               </div>
 
-              <Link 
+              <Link
+                to="/orders"
+                onClick={onClose}
+                className="mt-4 w-full rounded-full border border-gray-200 py-4 text-sm font-bold text-gray-700 transition hover:bg-gray-100"
+              >
+                Buyurtmalarni ko'rish
+              </Link>
+
+              <Link
                 to="/"
                 onClick={onClose}
-                className="mt-8 w-full rounded-full bg-gray-950 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
+                className="mt-3 w-full rounded-full bg-gray-950 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600"
               >
                 Continue Shopping
               </Link>

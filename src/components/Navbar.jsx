@@ -1,20 +1,18 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchModal from "./SearchModal";
 import { useCartStore } from "../store/cartStore";
 import { useWishlistStore } from "../store/wishlistStore";
 import { useThemeStore } from "../store/themeStore";
-import { auth } from "../Data/firebase";
-import { signOut } from "firebase/auth";
+import { auth, db } from "../Data/firebase";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
 
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/mac", label: "Mac" },
   { to: "/iphone", label: "iPhone" },
   { to: "/watch", label: "Watch" },
-  { to: "/admin", label: "Admin" },
 ];
 
 export default function Navbar() {
@@ -26,24 +24,45 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        // Firestore dan profil ma'lumotlarini olish
+        const docRef = doc(db, "users", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setAvatarUrl(docSnap.data().avatarUrl || "");
+          setDisplayName(docSnap.data().displayName || "");
+        }
+      }
     });
     return () => unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    navigate("/login");
-  };
+  // Avatar component
+  const Avatar = ({ size = "h-11 w-11", text = "text-sm" }) => (
+    <div className={`${size} rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700 transition hover:border-blue-500 flex-shrink-0`}>
+      {avatarUrl ? (
+        <img src={avatarUrl} alt="avatar" className="h-full w-full object-cover" onError={() => setAvatarUrl("")} />
+      ) : (
+        <div className={`h-full w-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center ${text} font-black text-white`}>
+          {displayName ? displayName[0].toUpperCase() : user?.email[0].toUpperCase()}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
       <nav className="fixed left-0 right-0 top-0 z-50 border-b border-black/5 bg-white/82 backdrop-blur-2xl transition-colors dark:border-white/5 dark:bg-gray-950/82">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
+
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 text-gray-950 transition hover:opacity-70 dark:text-white">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 814 1000" className="h-7 w-7 fill-current">
               <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.5 134.4-317.3 265.5-317.3 69.8 0 127.9 45.6 171.6 45.6 41.8 0 107.5-48 185.9-48 29.8 0 130.3 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z" />
@@ -51,7 +70,8 @@ export default function Navbar() {
             <span className="hidden text-sm font-black tracking-normal sm:inline">Apple Store</span>
           </Link>
 
-          <div className="hidden items-center gap-2 rounded-full border border-gray-200 bg-gray-50 p-1 md:flex">
+          {/* Nav links */}
+          <div className="hidden items-center gap-2 rounded-full border border-gray-200 bg-gray-50 p-1 md:flex dark:border-gray-800 dark:bg-gray-900">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
@@ -63,7 +83,10 @@ export default function Navbar() {
             ))}
           </div>
 
+          {/* Right side */}
           <div className="flex items-center gap-3">
+
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-50 hover:text-gray-950 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
@@ -80,6 +103,7 @@ export default function Navbar() {
               )}
             </button>
 
+            {/* Search */}
             <button
               onClick={() => setSearchOpen(true)}
               className="inline-flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-50 hover:text-gray-950 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
@@ -90,6 +114,7 @@ export default function Navbar() {
               </svg>
             </button>
 
+            {/* Wishlist */}
             <Link
               to="/wishlist"
               className="relative inline-flex h-11 min-w-11 items-center justify-center rounded-full bg-gray-50 px-3 text-gray-600 transition hover:bg-red-50 hover:text-red-500 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-500/20 dark:hover:text-red-400"
@@ -105,6 +130,7 @@ export default function Navbar() {
               )}
             </Link>
 
+            {/* Cart */}
             <Link
               to="/cart"
               className="relative inline-flex h-11 min-w-11 items-center justify-center rounded-full bg-gray-950 px-4 text-sm font-bold text-white transition hover:bg-blue-600 dark:bg-white dark:text-gray-950 dark:hover:bg-blue-500 dark:hover:text-white"
@@ -120,19 +146,24 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Logout tugmasi - faqat login qilgan bo'lsa ko'rinadi */}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="hidden md:inline-flex h-11 items-center justify-center rounded-full bg-red-500 px-4 text-sm font-bold text-white transition hover:bg-red-600"
+            {/* Profil avatar yoki Login tugmasi */}
+            {user ? (
+              <Link to="/profile" className="hidden md:flex">
+                <Avatar />
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="hidden md:inline-flex h-11 items-center justify-center rounded-full bg-blue-600 px-4 text-sm font-bold text-white transition hover:bg-blue-700"
               >
-                Logout
-              </button>
+                Login
+              </Link>
             )}
 
+            {/* Mobil menu toggle */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-950 md:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-950 md:hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               aria-label="Toggle menu"
             >
               {menuOpen ? (
@@ -151,26 +182,41 @@ export default function Navbar() {
 
       {/* Mobil menyu */}
       {menuOpen && (
-        <div className="fixed inset-x-0 top-[72px] z-40 border-b border-black/5 bg-white/96 px-5 py-5 shadow-2xl backdrop-blur-2xl md:hidden">
+        <div className="fixed inset-x-0 top-[72px] z-40 border-b border-black/5 bg-white/96 px-5 py-5 shadow-2xl backdrop-blur-2xl md:hidden dark:bg-gray-950/96 dark:border-white/5">
           <div className="mx-auto grid max-w-7xl gap-2">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-2xl px-4 py-4 text-lg font-black text-gray-950 transition hover:bg-gray-100"
+                className="rounded-2xl px-4 py-4 text-lg font-black text-gray-950 transition hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800"
               >
                 {link.label}
               </Link>
             ))}
-            {/* Mobil logout */}
-            {user && (
-              <button
-                onClick={() => { handleLogout(); setMenuOpen(false); }}
-                className="rounded-2xl px-4 py-4 text-lg font-black text-red-500 transition hover:bg-red-50 text-left"
+
+            {user ? (
+              <Link
+                to="/profile"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-2xl px-4 py-4 transition hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                Logout
-              </button>
+                <Avatar size="h-10 w-10" text="text-sm" />
+                <div>
+                  <p className="text-sm font-black text-gray-950 dark:text-white">
+                    {displayName || "Profil"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+                </div>
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-2xl px-4 py-4 text-lg font-black text-blue-600 transition hover:bg-blue-50 dark:text-blue-400"
+              >
+                Login
+              </Link>
             )}
           </div>
         </div>

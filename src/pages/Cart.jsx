@@ -1,13 +1,20 @@
 import { useCartStore } from "../store/cartStore";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CheckoutModal from "../components/CheckoutModal";
+import { auth } from "../Data/firebase";
 
 export default function Cart() {
   const { cart, removeFromCart, addToCart, decreaseQty, clearCart } = useCartStore();
   const [isCheckoutOpen, setCheckoutOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => setUser(u));
+    return () => unsubscribe();
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#f5f5f7] px-5 py-12 sm:px-8 lg:px-10 dark:bg-[#030712]">
@@ -27,7 +34,7 @@ export default function Cart() {
             <svg xmlns="http://www.w3.org/2000/svg" className="mb-5 h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-1.684 2.032-3.406 2.032-3.406a3 3 0 00-2.81-4.094H6.106l-.384-1.437A1.125 1.125 0 004.635 6H2.25" />
             </svg>
-            <h2 className="text-2xl font-black text-gray-950">Savat bo'sh</h2>
+            <h2 className="text-2xl font-black text-gray-950 dark:text-white">Savat bo'sh</h2>
             <p className="mt-2 max-w-sm text-sm leading-6 text-gray-500">
               Katalogdan yoqqan mahsulotingizni tanlab, savatga qo'shing.
             </p>
@@ -45,14 +52,13 @@ export default function Cart() {
                   </div>
 
                   <div>
-                    <h2 className="text-lg font-black text-gray-950">{item.title}</h2>
+                    <h2 className="text-lg font-black text-gray-950 dark:text-white">{item.title}</h2>
                     <p className="mt-1 text-sm text-gray-500">${item.price}</p>
 
                     <div className="mt-4 inline-flex items-center gap-3 rounded-full bg-gray-100 p-1 dark:bg-gray-800">
                       <button
                         onClick={() => decreaseQty(item.id)}
                         className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg font-bold text-gray-900 shadow-sm transition hover:bg-gray-950 hover:text-white dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                        aria-label="Decrease quantity"
                       >
                         -
                       </button>
@@ -60,7 +66,6 @@ export default function Cart() {
                       <button
                         onClick={() => addToCart(item)}
                         className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-lg font-bold text-gray-900 shadow-sm transition hover:bg-gray-950 hover:text-white dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                        aria-label="Increase quantity"
                       >
                         +
                       </button>
@@ -96,7 +101,7 @@ export default function Cart() {
                 <span>Jami</span>
                 <span>${total}</span>
               </div>
-              <button 
+              <button
                 onClick={() => setCheckoutOpen(true)}
                 className="mt-6 min-h-12 w-full rounded-full bg-gray-950 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue-600 active:scale-[0.98] dark:bg-white dark:text-gray-950 dark:hover:bg-blue-500 dark:hover:text-white"
               >
@@ -107,14 +112,13 @@ export default function Cart() {
         )}
       </section>
 
-      <CheckoutModal 
-        isOpen={isCheckoutOpen} 
-        onClose={() => setCheckoutOpen(false)} 
-        totalAmount={total} 
-        totalItems={totalQty} 
-        onSuccess={() => {
-          clearCart();
-        }} 
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        totalAmount={total}
+        totalItems={totalQty}
+        user={user}
+        onSuccess={() => { clearCart(); }}
       />
     </main>
   );

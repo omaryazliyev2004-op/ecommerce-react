@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 
-import { auth } from "./Data/firebase"; // 🔥 TO‘G‘RILANDI
+import { auth } from "./Data/firebase";
 
 import { useThemeStore } from "./store/themeStore";
 import { useProductStore } from "./store/productStore";
@@ -21,6 +21,9 @@ import Admin from "./pages/Admin";
 import Wishlist from "./pages/Wishlist";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import AdminLogin from "./pages/AdminLogin";
+import Profile from "./pages/Profile";
+import Orders from "./pages/Orders";
 
 
 function ProtectedRoute({ user, children }) {
@@ -99,6 +102,37 @@ function App() {
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          <Route path="/admin-login" element={<AdminLogin />} />
+
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute user={user}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+    
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute user={user}>
+                <Orders />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute user={user}>
+                <Admin />
+              </AdminRoute>
+            }
+          />
 
           <Route
             path="/cart"
