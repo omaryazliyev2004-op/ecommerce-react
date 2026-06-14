@@ -20,15 +20,24 @@ export default function Profile() {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-            if (!currentUser) { navigate("/login"); return; }
+            if (!currentUser) { 
+                setLoading(false);
+                navigate("/login"); 
+                return; 
+            }
             setUser(currentUser);
-            const docRef = doc(db, "users", currentUser.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) setForm((prev) => ({ ...prev, ...docSnap.data() }));
-            setLoading(false);
+            try {
+                const docRef = doc(db, "users", currentUser.uid);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) setForm((prev) => ({ ...prev, ...docSnap.data() }));
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setLoading(false);
+            }
         });
         return () => unsubscribe();
-    }, []);
+    }, [navigate]);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
