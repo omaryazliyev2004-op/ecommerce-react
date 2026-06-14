@@ -85,9 +85,9 @@ export default function Profile() {
 
             <div className="mx-auto max-w-2xl px-5 sm:px-8">
 
-                {/* Avatar */}
-                <div className="relative -mt-16 mb-6 flex items-end justify-between">
-                    <div className="relative">
+                {/* Avatar and actions */}
+                <div className="relative -mt-16 mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-0">
+                    <div className="relative self-start sm:self-auto">
                         {form.avatarUrl ? (
                             <img
                                 src={form.avatarUrl}
@@ -104,23 +104,25 @@ export default function Profile() {
                         <span className="absolute bottom-2 right-2 h-4 w-4 rounded-full bg-green-500 border-2 border-[#f5f5f7] dark:border-[#030712]" />
                     </div>
 
-                    <Link
-                        to="/orders"
-                        className="mb-3 flex items-center justify-center gap-2 w-full rounded-full border border-gray-200 py-4 text-sm font-bold text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-                    >
-                        📦 Buyurtmalar tarixi
-                    </Link>
+                    <div className="mb-2 flex flex-wrap items-center gap-3">
+                        <Link
+                            to="/orders"
+                            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 shadow-sm transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+                        >
+                            📦 Buyurtmalar tarixi
+                        </Link>
 
-                    {/* Logout */}
-                    <button
-                        onClick={handleLogout}
-                        className="mb-2 flex items-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white hover:border-red-500 dark:border-red-500/20 dark:bg-gray-900 dark:hover:bg-red-500 dark:hover:border-red-500"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Logout
-                    </button>
+                        {/* Logout */}
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-bold text-red-500 shadow-sm transition hover:bg-red-500 hover:text-white hover:border-red-500 dark:border-red-500/20 dark:bg-gray-900 dark:hover:bg-red-500 dark:hover:border-red-500"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
+                            Logout
+                        </button>
+                    </div>
                 </div>
 
                 {/* Ism va email */}
