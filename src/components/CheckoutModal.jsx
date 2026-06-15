@@ -38,19 +38,19 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
       await addDoc(collection(db, "orders"), {
         userId: user?.uid || "guest",
         userEmail: user?.email || "guest",
-        name: formData.name,
-        phone: formData.phone,
-        address: formData.address,
-        paymentMethod: formData.paymentMethod,
+        name: formData.name || "",
+        phone: formData.phone || "",
+        address: formData.address || "",
+        paymentMethod: formData.paymentMethod || "cash",
         items: cart.map((item) => ({
-          id: item.id,
-          title: item.title,
-          price: item.price,
-          qty: item.qty,
-          image: item.image,
+          id: item.id || null,
+          title: item.title || "",
+          price: item.price || 0,
+          qty: item.qty || 1,
+          image: item.image || "",
         })),
-        totalAmount,
-        totalItems,
+        totalAmount: totalAmount || 0,
+        totalItems: totalItems || 0,
         status: "pending",
         createdAt: serverTimestamp(),
       });
@@ -60,6 +60,7 @@ export default function CheckoutModal({ isOpen, onClose, totalAmount, totalItems
       onSuccess();
     } catch (error) {
       console.error("Buyurtma saqlashda xatolik:", error);
+      alert("Xatolik: " + error.message);
       setIsProcessing(false);
     }
   };
